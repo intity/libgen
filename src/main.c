@@ -293,8 +293,8 @@ int main(int argc, char *argv[])
 	initscr();
 	start_color();
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
-	raw();
 	keypad(stdscr, TRUE);
+	cbreak();
 	noecho();
 	curs_set(0);
 	getmaxyx(stdscr, cr.szh, cr.szw);
@@ -313,10 +313,6 @@ int main(int argc, char *argv[])
 		refresh();
 	}
 
-	noraw();
-	keypad(stdscr, FALSE);
-	echo();
 	endwin();
-
-	return 0;
+	exit(0);
 }
