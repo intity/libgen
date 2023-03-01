@@ -22,7 +22,8 @@ static int get_index(cursor *cr)
 		index = cr->sec_index;
 		break;
 	case 1:
-		index = cr->ent_index;
+		index = cr->ent_index < cr->ent_count 
+			? cr->ent_index : cr->ent_count - 1;
 		break;
 	}
 	return index;
