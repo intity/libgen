@@ -1,0 +1,103 @@
+.TH LIBGEN 1 "2023-03-01" "Library Genesis 0.1.0" "Library Genesis"
+.SH NAME
+libgen \- command-line software for a configure bibliography data
+.SH SYNOPSIS
+.PP
+.B libgen
+.br
+\fBlibgen\fR [ \fB\-\-delete\fR=\fIKEY\fR ]
+.br
+\fBlibgen\fR [ \fB-\-insert\fR=\fIFILE\fR ]
+.br
+\fBlibgen\fR [ \fB-\-query\fR=\fISQL\fR ]
+.br
+\fBlibgen\fR [ \fB-\-sync\fR ]
+.SH DESCRIPTION
+.PP
+The \fBlibgen\fR software package provides simple features for save bibliographic 
+.br
+data in a local database.
+.SH OPTIONS
+.TP
+\fB\-d\fR, \fB\-\-delete\fR=\fIKEY\fR
+delete entry from database
+.TP
+\fB\-i\fR, \fB\-\-insert\fR=\fIFILE\fR
+insert a new entry to database
+.TP
+\fB\-q\fR, \fB\-\-query\fR=\fISQL\fR
+query SQL
+.TP
+\fB\-u\fR, \fB\-\-update\fR=\fIFILE\fR
+update exist entry of database
+.TP
+\fB\-?\fR, \fB\-\-help\fR
+give this help list
+.TP
+\fB\-\-usage\fR
+give a short usage message
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+print program version
+.SH ENVIRONMENT
+.PP
+The \fBlibgen\fR software package is configured by adding environment variables.
+.TP
+.B LIBGEN_LDB
+Redefine the path to the local database file. This variable is set 
+.br
+only when the local database needs to be moved. By default, the 
+.br
+database location is set to /usr/local/libgen/library.db
+.TP
+.B LIBGEN_LIB
+Set the path to the libgary directory. For example:
+.br
+export LIBGEN_LIB=${HOME}/Library
+.TP
+.B LIBGEN_VI1
+Set the viewer for PDF files. For example:
+.br
+export LIBGEN_VI1=mupdf
+.TP
+.B LIBGEN_VI2
+Set the viewer for DJVU files. For example:
+.br
+export LIBGEN_VI2=djview
+.SH FILES
+.nf
+/usr/local/libgen/library.db
+.fi
+.SH INTERACTIVE CONTROL
+.PP
+The following keys are used to control libgen in interactive mode:
+.HP
+.B LEFT RIGHT UP DOWN
+.br
+Defines the current cursor movement vector.
+.TP
+.B ENTER
+If the cursor position is located in the first column, then this 
+.br
+action enables/disables the keyword to define the target of the 
+.br
+query. When a keyword is enabled, the cursor is highlighted in a 
+.br
+different color; when the \fBENTER\fR key is pressed again, the 
+.br
+keyword is removed from the query target. Note that the result 
+.br
+of sorting entries is displayed in the second column.
+.TP
+\ 
+If the cursor position is located in the second column, then this 
+.br
+action starts a other process of viewing the file in another 
+.br
+program.
+.TP
+.B q
+Quit interactive mode.
+.SH REPORTING BUGS
+.PP
+Report bugs to <https://github.com/intity/libgen/issues>.
