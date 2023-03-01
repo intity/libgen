@@ -93,7 +93,7 @@ static void delete(char *sql, char *key)
 
 static void insert(char *sql, char *data)
 {
-	int len, i;
+	int len, i, counter = 0;
 	char key[2048], val[2048];
 	field tmp[COL_COUNT];
 	len = init_entry(tmp, data);
@@ -107,23 +107,23 @@ static void insert(char *sql, char *data)
 	{
 		if (strlen(tmp[i].key) == 0)
 			continue;
+		else if (counter > 0)
+		{
+			strcat(key, ",");
+			strcat(val, ",");
+		}
 
 		strcat(key, tmp[i].key);
 		strcat(val, tmp[i].val);
-		strcat(key, ",");
-		strcat(val, ",");
+		counter++;
 	}
-
-	// remove last comma
-	key[strlen(key) - 1] = 0;
-	val[strlen(val) - 1] = 0;
 
 	sprintf(sql, "INSERT INTO entries (%s) VALUES (%s);", key, val);
 }
 
 static void update(char *sql, char *data)
 {
-	int len, i;
+	int len, i, counter = 0;
 	char key[256], pairs[2048];
 	field tmp[COL_COUNT];
 	len = init_entry(tmp, data);
@@ -137,22 +137,20 @@ static void update(char *sql, char *data)
 	{
 		if (strlen(tmp[i].key) == 0)
 			continue;
-
-		if (strcmp(tmp[i].key, "entry_k") == 0)
+		else if (strcmp(tmp[i].key, "entry_k") == 0)
 		{
 			strcpy(key, tmp[i].val);
 			continue;
 		}
+		else if (counter > 0)
+			strcat(pairs, ",");
 
 		strcat(pairs, "\n");
 		strcat(pairs, tmp[i].key);
 		strcat(pairs, "=");
 		strcat(pairs, tmp[i].val);
-		strcat(pairs, ",");
+		counter++;
 	}
-
-	// remove last comma
-	pairs[strlen(pairs) - 1] = 0;
 
 	sprintf(sql, "UPDATE entries \nSET %s \nWHERE entry_k=%s;", pairs, key);
 }
@@ -431,7 +429,6 @@ void init_targets(target *ptargets)
 void update_ui(cursor *cr)
 {
 	int len = 0;
-	int ind = 1;
 	char sql[4096];
 	char col[] = "entry_k,entry_t,keywords,author,edition,editor,title,translator,file,year";
 	char tokens[2048];
