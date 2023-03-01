@@ -1,0 +1,7 @@
+# manual: https://editorconfig.org
+
+root = true
+
+[*.{c,h}]
+indent_style = tab
+indent_size = 4
