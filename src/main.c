@@ -66,6 +66,18 @@ static int get_state(cursor *cr)
 	return state;
 }
 
+static int get_pos_x(cursor *cr)
+{
+	int pos = 0;
+	switch (cr->col_index)
+	{
+	case 1:
+		pos = cr->sec_width;
+		break;
+	}
+	return pos;
+}
+
 static int set_index(cursor *cr, int val)
 {
 	int index = get_index(cr);
@@ -173,7 +185,7 @@ static struct argp argp = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 void key_bindings(int ch, cursor *cr)
 {
-	int y, x, col_width, row_index, row_count, old_state, cur_state;
+	int y, x, col_width, row_index, row_count, old_state, cur_state, cur_pos_x;
 	col_width = get_width(cr);
 	row_index = get_index(cr);
 	row_count = get_count(cr);
@@ -252,8 +264,9 @@ void key_bindings(int ch, cursor *cr)
 		cr->ent_width = cr->szw * COL1;
 		cur_state = get_state(cr);
 		col_width = get_width(cr);
+		cur_pos_x = get_pos_x(cr);
 		update_ui(cr);
-		mvchgat(row_index, x, col_width, A_REVERSE, cur_state, NULL);
+		mvchgat(row_index, cur_pos_x, col_width, A_REVERSE, cur_state, NULL);
 		break;
 	}
 }
