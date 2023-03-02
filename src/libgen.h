@@ -6,8 +6,9 @@
 #define LIBGEN_H
 
 #define LIBGEN_DB "/usr/local/libgen/library.db"
-#define COL_COUNT 100
+#define ENT_COUNT 100
 #define SEC_COUNT 100
+#define COL_COUNT 2
 
 /* width columns */
 #define COL0 0.2 // (20%) 1/5
@@ -30,12 +31,6 @@
 
 typedef struct
 {
-	int state; // (0) unselected, (1) selected
-	char token[128];
-} target;
-
-typedef struct
-{
 	char *ldb; // local database
 	char *lib; // library directory
 	char *vi1; // viewer for PDF files
@@ -44,13 +39,23 @@ typedef struct
 
 typedef struct
 {
+	int state; // (0) unselected, (1) selected
+	char token[128];
+} target;
+
+typedef struct
+{
+	int cur_index; // cursor index
+	int cur_count; // cursor count
+	int cur_width; // cursor width
+	int row_index; // row index
+	int row_count; // row count
+	int off_count; // offset count
+} column;
+
+typedef struct
+{
 	int col_index; // column index
-	int ent_index; // entry index
-	int ent_width; // entry column width
-	int ent_count; // entry row count
-	int sec_index; // section index
-	int sec_width; // section column width
-	int sec_count; // section row count
 	int szh; // window height/row height
 	int szw; // window width
 	/* custom fields */
@@ -69,16 +74,17 @@ typedef struct
 } cursor;
 
 /**
- * Initialize config
+ * Initializing config
  * @pcfg config pointer
  */
 void init_cfg(config *pcfg);
 
 /**
- * Initialize keywords
- * @ptargets
+ * Initializing structs
+ * @targets
+ * @columns
  */
-void init_targets(target *ptargets);
+void init_structs(target *targets, column *columns);
 
 /**
  * the update UI function

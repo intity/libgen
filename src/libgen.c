@@ -40,6 +40,7 @@ static int sec_count; // section count
 static cursor *pcr = NULL;
 static config *cfg = NULL;
 static target *targets = NULL;
+static column *columns = NULL;
 
 static int init_entry(field *tmp, char *data)
 {
@@ -95,7 +96,7 @@ static void insert(char *sql, char *data)
 {
 	int len, i, counter = 0;
 	char key[2048], val[2048];
-	field tmp[COL_COUNT];
+	field tmp[ENT_COUNT];
 	len = init_entry(tmp, data);
 	if (len == 0)
 		return;
@@ -125,7 +126,7 @@ static void update(char *sql, char *data)
 {
 	int len, i, counter = 0;
 	char key[256], pairs[2048];
-	field tmp[COL_COUNT];
+	field tmp[ENT_COUNT];
 	len = init_entry(tmp, data);
 	if (len == 0)
 		return;
@@ -211,16 +212,27 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 	{
 		if (strcmp(col_name[i], "title") == 0)
 		{
-			if (pcr->ent_index == ent_index)
+			int cur_count = columns[1].cur_count;
+			int cur_width = columns[0].cur_width;
+			int off_count = columns[1].off_count;
+			
+			if (columns[1].cur_index == ent_index)
 			{
 				memset(pcr->title, 0, 256);
 				strcpy(pcr->title, argv[i]);
 			}
 
-			mvprintw(pcr->ent_count, pcr->sec_width, " %s", argv[i]);
-			pcr->ent_count++;
+			columns[1].row_count++;
+
+			if (off_count > ent_index)
+				continue;
+			else if (cur_count != pcr->szh)
+			{
+				mvprintw(cur_count, cur_width, " %s", argv[i]);
+				columns[1].cur_count++;
+			}
 		}
-		else if (pcr->ent_index != ent_index)
+		else if (columns[1].cur_index != ent_index)
 		{
 			continue;
 		}
@@ -419,33 +431,45 @@ void init_cfg(config *pcfg)
 	}
 }
 
-void init_targets(target *ptargets)
+void init_structs(target *ptargets, column *pcolumns)
 {
 	targets = ptargets;
+	columns = pcolumns;
 	char sql[] = "SELECT keywords FROM entries;";
 	query_task(ARGS_KEY_QUERY, 2, sql);
 }
 
 void update_ui(cursor *cr)
 {
-	int len = 0;
+	int len = 0, index;
 	char sql[4096];
 	char col[] = "entry_k,entry_t,keywords,author,edition,editor,title,translator,file,year";
 	char tokens[2048];
 	pcr = cr;
-	pcr->sec_count = 0;
-	pcr->ent_count = 0;
+	columns[0].cur_count = 0;
+	columns[1].cur_count = 0;
+	columns[0].row_count = sec_count;
+	columns[1].row_count = 0;
 	ent_index = 0;
 	clear();
 	memset(tokens, 0, 2048);
+	//
+	// targets update
+	//
 	for (int i = 0; i < sec_count; i++)
 	{
-		mvprintw(pcr->sec_count, 0, " %s", targets[i].token);
-		pcr->sec_count++;
+		if (columns[0].off_count > i)
+			continue;
+		if (columns[0].cur_count == pcr->szh)
+			break;
+		
+		index = columns[0].cur_count;
+		mvprintw(index, 0, " %s", targets[i].token);
+		columns[0].cur_count++;
 
 		if (targets[i].state == 1)
 		{
-			mvchgat(i, 0, cr->sec_width, A_NORMAL, 1, NULL);
+			mvchgat(index, 0, columns[0].cur_width, A_NORMAL, 1, NULL);
 			if (len > 0)
 				strcat(tokens, " AND ");
 			strcat(tokens, "keywords LIKE '%%");
@@ -455,7 +479,7 @@ void update_ui(cursor *cr)
 		}
 		else
 		{
-			mvchgat(i, 0, cr->sec_width, A_NORMAL, 0, NULL);
+			mvchgat(index, 0, columns[0].cur_width, A_NORMAL, 0, NULL);
 		}
 	}
 	//

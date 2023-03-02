@@ -12,6 +12,7 @@
 #define SHELL "/bin/sh"
 static config cfg;
 static target targets[SEC_COUNT];
+static column columns[COL_COUNT];
 
 static int get_index(cursor *cr)
 {
@@ -19,51 +20,24 @@ static int get_index(cursor *cr)
 	switch (cr->col_index)
 	{
 	case 0:
-		index = cr->sec_index;
+		index = columns[0].cur_index;
 		break;
 	case 1:
-		index = cr->ent_index < cr->ent_count 
-			? cr->ent_index : cr->ent_count - 1;
+		if (columns[1].cur_index < columns[1].cur_count)
+			index = columns[1].cur_index;
+		else
+			index = columns[1].cur_count - 1;
 		break;
 	}
 	return index;
 }
 
-static int get_count(cursor *cr)
-{
-	int count = 0;
-	switch (cr->col_index)
-	{
-	case 0:
-		count = cr->sec_count;
-		break;
-	case 1:
-		count = cr->ent_count;
-		break;
-	}
-	return count;
-}
-
-static int get_width(cursor *cr)
-{
-	int width = 0;
-	switch (cr->col_index)
-	{
-	case 0:
-		width = cr->sec_width;
-		break;
-	case 1:
-		width = cr->ent_width;
-		break;
-	}
-	return width;
-}
-
 static int get_state(cursor *cr)
 {
 	int state = 0;
+	int index = columns[0].cur_index;
 	if (cr->col_index == 0)
-		state = targets[cr->sec_index].state;
+		state = targets[index].state;
 	return state;
 }
 
@@ -73,33 +47,19 @@ static int get_pos_x(cursor *cr)
 	switch (cr->col_index)
 	{
 	case 1:
-		pos = cr->sec_width;
+		pos = columns[0].cur_width;
 		break;
 	}
 	return pos;
 }
 
-static int set_index(cursor *cr, int val)
-{
-	int index = get_index(cr);
-	switch (cr->col_index)
-	{
-	case 0:
-		cr->sec_index = val;
-		break;
-	case 1:
-		cr->ent_index = val;
-		break;
-	}
-	return index; // old index
-}
-
 static int set_state(cursor *cr, int val)
 {
 	int state = get_state(cr);
+	int index = columns[0].cur_index;
 	if (state != val)
 	{
-		targets[cr->sec_index].state = val;
+		targets[index].state = val;
 	}
 	return state; // old state
 }
@@ -145,6 +105,52 @@ static char *get_viewer(const char *file)
 	return NULL;
 }
 
+static void resize_ui(cursor *cr)
+{
+	int cur_index, cur_pos_x, cur_state, cur_width, row_index;
+
+	getmaxyx(stdscr, cr->szh, cr->szw);
+	columns[0].cur_width = cr->szw * COL0;
+	columns[1].cur_width = cr->szw * COL1;
+
+	row_index = columns[0].row_index;
+	if (cr->szh > row_index)
+		columns[0].row_index = row_index;
+	else
+	{
+		columns[0].row_index = 0;
+		columns[0].off_count = 0;
+	}
+
+	row_index = columns[1].row_index;
+	if (cr->szh > row_index)
+		columns[1].row_index = row_index;
+	else
+	{
+		columns[1].row_index = 0;
+		columns[1].off_count = 0;
+	}
+
+	cur_index = columns[0].cur_index;
+	if (cr->szh > cur_index)
+		columns[0].cur_index = cur_index;
+	else
+		columns[0].cur_index = 0;
+
+	cur_index = columns[1].cur_index;
+	if (cr->szh > cur_index)
+		columns[1].cur_index = cur_index;
+	else
+		columns[1].cur_index = 0;
+
+	cur_index = columns[cr->col_index].cur_index;
+	cur_width = columns[cr->col_index].cur_width;
+	cur_state = get_state(cr);
+	cur_pos_x = get_pos_x(cr);
+	update_ui(cr);
+	mvchgat(cur_index, cur_pos_x, cur_width, A_REVERSE, cur_state, NULL);
+}
+
 const char *argp_program_version = "libgen 0.1.0";
 const char *argp_program_bug_address = "<https://github.com/intity/libgen/issues>";
 
@@ -186,58 +192,85 @@ static struct argp argp = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 void key_bindings(int ch, cursor *cr)
 {
-	int y, x, col_width, row_index, row_count, old_state, cur_state, cur_pos_x;
-	col_width = get_width(cr);
-	row_index = get_index(cr);
-	row_count = get_count(cr);
+	int y, x, cur_index, cur_state, cur_width, old_state, row_index, row_count;
+	cur_index = get_index(cr);
 	old_state = get_state(cr);
+	row_index = columns[cr->col_index].row_index;
+	row_count = columns[cr->col_index].row_count;
 	getyx(stdscr, y, x);
 	switch (ch)
 	{
 	case KEY_DOWN:
-		if (row_index < row_count - 1)
+		if (cur_index < columns[cr->col_index].cur_count - 1)
 		{
-			row_index = y + 1;
-			set_index(cr, row_index);
+			cur_index = y + 1;
+			columns[cr->col_index].cur_index = cur_index;
+			cur_width = columns[cr->col_index].cur_width;
 			cur_state = get_state(cr);
-			chgat(col_width, A_NORMAL, old_state, NULL);
+			chgat(cur_width, A_NORMAL, old_state, NULL);
 			if (cr->col_index == 1)
 				update_ui(cr);
-			mvchgat(row_index, x, col_width, A_REVERSE, cur_state, NULL);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
+			columns[cr->col_index].row_index++;
+		}
+		else if (row_index < row_count - 1)
+		{
+			row_index++;
+			columns[cr->col_index].off_count++;
+			columns[cr->col_index].row_index = row_index;
+			cur_width = columns[cr->col_index].cur_width;
+			cur_state = get_state(cr);
+			update_ui(cr);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
 		}
 		break;
 	case KEY_UP:
-		if (row_index > 0)
+		if (cur_index > 0)
 		{
-			row_index = y - 1;
-			set_index(cr, row_index);
+			cur_index = y - 1;
+			columns[cr->col_index].cur_index = cur_index;
 			cur_state = get_state(cr);
-			chgat(col_width, A_NORMAL, old_state, NULL);
+			cur_width = columns[cr->col_index].cur_width;
+			chgat(cur_width, A_NORMAL, old_state, NULL);
 			if (cr->col_index == 1)
 				update_ui(cr);
-			mvchgat(row_index, x, col_width, A_REVERSE, cur_state, NULL);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
+			columns[cr->col_index].row_index--;
 		}
+		else if (row_index > 0)
+		{
+			row_index--;
+			columns[cr->col_index].off_count--;
+			columns[cr->col_index].row_index = row_index;
+			cur_width = columns[cr->col_index].cur_width;
+			cur_state = get_state(cr);
+			update_ui(cr);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
+		}
+
 		break;
 	case KEY_LEFT:
 		if (cr->col_index == 1)
 		{
 			cr->col_index--;
-			row_index = get_index(cr);
+			cur_index = get_index(cr);
 			cur_state = get_state(cr);
-			x -= cr->sec_width;
-			chgat(cr->ent_width, A_NORMAL, old_state, NULL);
-			mvchgat(row_index, x, cr->sec_width, A_REVERSE, cur_state, NULL);
+			cur_width = columns[0].cur_width;
+			x -= cur_width;
+			chgat(columns[1].cur_width, A_NORMAL, old_state, NULL);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
 		}
 		break;
 	case KEY_RIGHT:
 		if (cr->col_index == 0)
 		{
 			cr->col_index++;
-			row_index = get_index(cr);
+			cur_index = get_index(cr);
 			cur_state = get_state(cr);
-			x += cr->sec_width;
-			chgat(cr->sec_width, A_NORMAL, old_state, NULL);
-			mvchgat(row_index, x, cr->ent_width, A_REVERSE, cur_state, NULL);
+			cur_width = columns[1].cur_width;
+			x += columns[0].cur_width;
+			chgat(columns[0].cur_width, A_NORMAL, old_state, NULL);
+			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
 		}
 		break;
 	case KEY_ENTER:
@@ -245,9 +278,10 @@ void key_bindings(int ch, cursor *cr)
 		if (cr->col_index == 0)
 		{
 			cur_state = old_state ? 0 : 1;
+			cur_width = columns[0].cur_width;
 			set_state(cr, cur_state);
 			update_ui(cr);
-			mvchgat(row_index, 0, cr->sec_width, A_REVERSE, cur_state, NULL);
+			mvchgat(cur_index, 0, cur_width, A_REVERSE, cur_state, NULL);
 		}
 		else // commands
 		{
@@ -260,14 +294,7 @@ void key_bindings(int ch, cursor *cr)
 		}
 		break;
 	case KEY_RESIZE:
-		getmaxyx(stdscr, cr->szh, cr->szw);
-		cr->sec_width = cr->szw * COL0;
-		cr->ent_width = cr->szw * COL1;
-		cur_state = get_state(cr);
-		col_width = get_width(cr);
-		cur_pos_x = get_pos_x(cr);
-		update_ui(cr);
-		mvchgat(row_index, cur_pos_x, col_width, A_REVERSE, cur_state, NULL);
+		resize_ui(cr);
 		break;
 	}
 }
@@ -277,10 +304,11 @@ int main(int argc, char *argv[])
 	int ch;
 	cursor cr = {
 		.col_index = 0,
-		.ent_index = 0,
-		.sec_index = 0,
 		.szh = 0,
-		.szw = 0};
+		.szw = 0
+	};
+	columns[0].cur_index = 0;
+	columns[1].cur_index = 0;
 
 	setlocale(LC_ALL, "en_US.UTF-8");
 	init_cfg(&cfg);
@@ -300,12 +328,12 @@ int main(int argc, char *argv[])
 	curs_set(0);
 	getmaxyx(stdscr, cr.szh, cr.szw);
 
-	cr.sec_width = cr.szw * COL0;
-	cr.ent_width = cr.szw * COL1;
+	columns[0].cur_width = cr.szw * COL0;
+	columns[1].cur_width = cr.szw * COL1;
 
-	init_targets(targets);
+	init_structs(targets, columns);
 	update_ui(&cr);
-	mvchgat(0, 0, cr.sec_width, A_REVERSE, 0, NULL);
+	mvchgat(0, 0, columns[0].cur_width, A_REVERSE, 0, NULL);
 	refresh();
 
 	while ((ch = getch()) != 'q')
