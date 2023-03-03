@@ -340,7 +340,8 @@ int query_task(int ch, int mode, char *data)
 	char *error = NULL;
 	char sql[4096];
 	int rc;
-	int (*callback)(void *, int, char **, char **);
+	typedef int (*func)(void *, int, char **, char **);
+	func callback = NULL;
 
 	switch (mode)
 	{
@@ -426,7 +427,7 @@ void init_cfg(config *pcfg)
 
 	if (cfg->ldb == NULL)
 	{
-		cfg->ldb = calloc(strlen(LIBGEN_DB), sizeof(char));
+		cfg->ldb = calloc(strlen(LIBGEN_DB) + 1, sizeof(char));
 		strcpy(cfg->ldb, LIBGEN_DB);
 	}
 }
