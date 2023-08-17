@@ -162,7 +162,7 @@ static int call_0(__unused void *reserved, int argc, char **argv, char **col_nam
 	// print entries in bib format
 	//
 	int i, count = 0;
-	char entry_k[32];
+	char entry_k[64];
 	char entry_t[128];
 	field tmp[argc];
 
@@ -172,7 +172,7 @@ static int call_0(__unused void *reserved, int argc, char **argv, char **col_nam
 			continue;
 		else if (strcmp(col_name[i], "entry_k") == 0)
 		{
-			memset(entry_k, 0, 32);
+			memset(entry_k, 0, 64);
 			strcpy(entry_k, argv[i]);
 			continue;
 		}
