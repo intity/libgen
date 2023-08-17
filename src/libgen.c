@@ -267,6 +267,13 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->editor, argv[i]);
 		}
+		else if (strcmp(col_name[i], "isbn") == 0)
+		{
+			memset(pcr->isbn, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->isbn, argv[i]);
+		}
 		else if (strcmp(col_name[i], "file") == 0)
 		{
 			memset(pcr->file, 0, 256);
@@ -444,7 +451,7 @@ void update_ui(cursor *cr)
 {
 	int len = 0, index;
 	char sql[4096];
-	char col[] = "entry_k,entry_t,keywords,author,edition,editor,title,translator,file,year";
+	char col[] = "entry_k,entry_t,keywords,author,edition,editor,isbn,title,translator,file,year";
 	char tokens[2048];
 	pcr = cr;
 	columns[0].cur_count = 0;
@@ -498,14 +505,15 @@ void update_ui(cursor *cr)
 	//
 	// print details for selected entry
 	//
-	mvprintw(0, pcr->szw * COL2, "entry_k   : %s", pcr->entry_k);
-	mvprintw(1, pcr->szw * COL2, "entry_t   : %s", pcr->entry_t);
-	mvprintw(2, pcr->szw * COL2, "keywords  : %s", pcr->keywords);
-	mvprintw(3, pcr->szw * COL2, "author    : %s", pcr->author);
-	mvprintw(4, pcr->szw * COL2, "edition   : %s", pcr->edition);
-	mvprintw(5, pcr->szw * COL2, "editor    : %s", pcr->editor);
-	mvprintw(6, pcr->szw * COL2, "title     : %s", pcr->title);
-	mvprintw(7, pcr->szw * COL2, "translator: %s", pcr->translator);
-	mvprintw(8, pcr->szw * COL2, "file      : %s", pcr->file);
-	mvprintw(9, pcr->szw * COL2, "year      : %s", pcr->year);
+	mvprintw( 0, pcr->szw * COL2, "entry_k   : %s", pcr->entry_k);
+	mvprintw( 1, pcr->szw * COL2, "entry_t   : %s", pcr->entry_t);
+	mvprintw( 2, pcr->szw * COL2, "keywords  : %s", pcr->keywords);
+	mvprintw( 3, pcr->szw * COL2, "author    : %s", pcr->author);
+	mvprintw( 4, pcr->szw * COL2, "edition   : %s", pcr->edition);
+	mvprintw( 5, pcr->szw * COL2, "editor    : %s", pcr->editor);
+	mvprintw( 6, pcr->szw * COL2, "isbn      : %s", pcr->isbn);
+	mvprintw( 7, pcr->szw * COL2, "title     : %s", pcr->title);
+	mvprintw( 8, pcr->szw * COL2, "translator: %s", pcr->translator);
+	mvprintw( 9, pcr->szw * COL2, "file      : %s", pcr->file);
+	mvprintw(10, pcr->szw * COL2, "year      : %s", pcr->year);
 }
