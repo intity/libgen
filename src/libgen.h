@@ -68,6 +68,7 @@ typedef struct
 	char edition[256];
 	char editor[256];
 	char isbn[256];
+	char language[256];
 	char translator[256];
 	char title[256];
 	char file[256]; // book filename (example: book_name.djvu)
