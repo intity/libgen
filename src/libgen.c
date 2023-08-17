@@ -473,9 +473,9 @@ void update_ui(cursor *cr)
 			mvchgat(index, 0, columns[0].cur_width, A_NORMAL, 1, NULL);
 			if (len > 0)
 				strcat(tokens, " AND ");
-			strcat(tokens, "keywords LIKE '%%");
+			strcat(tokens, "instr(',' || keywords || ',' , ',");
 			strcat(tokens, targets[i].token);
-			strcat(tokens, "%%'");
+			strcat(tokens, ",') > 0");
 			len++;
 		}
 		else
