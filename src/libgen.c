@@ -168,7 +168,7 @@ static int call_0(__unused void *reserved, int argc, char **argv, char **col_nam
 
 	for (i = 0; i < argc; i++)
 	{
-		if (argv[i] == NULL)
+		if (argv[i] == NULL || strlen(argv[i]) == 0)
 			continue;
 		else if (strcmp(col_name[i], "entry_k") == 0)
 		{
