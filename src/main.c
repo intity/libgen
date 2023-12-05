@@ -247,7 +247,6 @@ void key_bindings(int ch, cursor *cr)
 			update_ui(cr);
 			mvchgat(cur_index, x, cur_width, A_REVERSE, cur_state, NULL);
 		}
-
 		break;
 	case KEY_LEFT:
 		if (cr->col_index == 1)
@@ -320,6 +319,7 @@ int main(int argc, char *argv[])
 	}
 
 	initscr();
+	use_default_colors();
 	start_color();
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
 	keypad(stdscr, TRUE);
