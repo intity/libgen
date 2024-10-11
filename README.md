@@ -1,4 +1,4 @@
-# libgen - Library Genesis
+# libgen - Library Genesis Tools
 
 `libgen` is an open source software designed to configure and store 
 bibliographic data in a local database.
@@ -20,7 +20,7 @@ mode:
 
 ## Dependencies
 
-- `ncursesw >= 6.3`
+- `ncurses >= 6.3`
 - `sqlite3 >= 3.34`
 
 ## Build and Install
