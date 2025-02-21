@@ -20,8 +20,8 @@ mode:
 
 ## Dependencies
 
-- `ncurses >= 6.3`
-- `sqlite3 >= 3.34`
+- `ncurses >= 6.5`
+- `sqlite3 >= 3.47`
 
 ## Build and Install
 
@@ -47,6 +47,10 @@ export LIBGEN_VI1=mupdf
 Set the viewer for DJVU files. For example:
 ```sh
 export LIBGEN_VI2=djview
+```
+Set the viewer by default. For example:
+```sh
+export LIBGEN_VID=zathura
 ```
 If you want to change the location of the database file, then you need to set a 
 `LIBGEN_LDB` variable to override the path. By default, the path to the local 
