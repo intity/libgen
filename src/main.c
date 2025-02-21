@@ -96,11 +96,15 @@ static char *get_viewer(const char *file)
 	}
 	else if (strcmp(ext, ".pdf") == 0)
 	{
-		return cfg.vi1;
+		return cfg.vid != NULL ? cfg.vid : cfg.vi1;
 	}
 	else if (strcmp(ext, ".djvu") == 0)
 	{
-		return cfg.vi2;
+		return cfg.vid != NULL ? cfg.vid : cfg.vi2;
+	}
+	else
+	{
+		return cfg.vid;
 	}
 	return NULL;
 }
@@ -151,7 +155,7 @@ static void resize_ui(cursor *cr)
 	mvchgat(cur_index, cur_pos_x, cur_width, A_REVERSE, cur_state, NULL);
 }
 
-const char *argp_program_version = "libgen 0.1.0";
+const char *argp_program_version = "libgen 0.2.0";
 const char *argp_program_bug_address = "<https://github.com/intity/libgen/issues>";
 
 static error_t parse_opt(int key, char *arg, __unused struct argp_state *state)

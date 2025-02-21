@@ -438,6 +438,7 @@ void init_cfg(config *pcfg)
 	cfg->lib = getenv("LIBGEN_LIB");
 	cfg->vi1 = getenv("LIBGEN_VI1");
 	cfg->vi2 = getenv("LIBGEN_VI2");
+	cfg->vid = getenv("LIBGEN_VID");
 
 	if (cfg->ldb == NULL)
 	{

@@ -35,6 +35,7 @@ typedef struct
 	char *lib; // library directory
 	char *vi1; // viewer for PDF files
 	char *vi2; // viewer for DJVU files
+	char *vid; // viewer by default
 } config;
 
 typedef struct
