@@ -156,6 +156,20 @@ static void update(char *sql, char *data)
 	sprintf(sql, "UPDATE entries \nSET %s \nWHERE entry_k=%s;", pairs, key);
 }
 
+static void output(char *sql, char *data)
+{
+	/**
+	 * format data [in ]: [key[:val]]
+	 * format data [out]: .bib
+	 * -----------------------------------------
+	 * TASKS                       | PARAMETERS
+	 * -----------------------------------------
+	 * output a entry by key       | [key]
+	 * -----------------------------------------
+	 */
+	sprintf(sql, "SELECT * FROM entries WHERE entry_k='%s'", data);
+}
+
 static int call_0(__unused void *reserved, int argc, char **argv, char **col_name)
 {
 	//
@@ -253,13 +267,6 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->author, argv[i]);
 		}
-		else if (strcmp(col_name[i], "edition") == 0)
-		{
-			memset(pcr->edition, 0, 256);
-			if (argv[i] == NULL)
-				continue;
-			strcpy(pcr->edition, argv[i]);
-		}
 		else if (strcmp(col_name[i], "editor") == 0)
 		{
 			memset(pcr->editor, 0, 256);
@@ -267,19 +274,12 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->editor, argv[i]);
 		}
-		else if (strcmp(col_name[i], "isbn") == 0)
+		else if (strcmp(col_name[i], "edition") == 0)
 		{
-			memset(pcr->isbn, 0, 256);
+			memset(pcr->edition, 0, 256);
 			if (argv[i] == NULL)
 				continue;
-			strcpy(pcr->isbn, argv[i]);
-		}
-		else if (strcmp(col_name[i], "language") == 0)
-		{
-			memset(pcr->language, 0, 256);
-			if (argv[i] == NULL)
-				continue;
-			strcpy(pcr->language, argv[i]);
+			strcpy(pcr->edition, argv[i]);
 		}
 		else if (strcmp(col_name[i], "file") == 0)
 		{
@@ -288,12 +288,33 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->file, argv[i]);
 		}
-		else if (strcmp(col_name[i], "translator") == 0)
+		else if (strcmp(col_name[i], "date") == 0)
 		{
-			memset(pcr->translator, 0, 256);
+			memset(pcr->date, 0, 128);
 			if (argv[i] == NULL)
 				continue;
-			strcpy(pcr->translator, argv[i]);
+			strcpy(pcr->date, argv[i]);
+		}
+		else if (strcmp(col_name[i], "year") == 0)
+		{
+			memset(pcr->year, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->year, argv[i]);
+		}
+		else if (strcmp(col_name[i], "isbn") == 0)
+		{
+			memset(pcr->isbn, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->isbn, argv[i]);
+		}
+		else if (strcmp(col_name[i], "pages") == 0)
+		{
+			memset(pcr->pages, 0, 128);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->pages, argv[i]);
 		}
 		else if (strcmp(col_name[i], "keywords") == 0)
 		{
@@ -302,12 +323,26 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->keywords, argv[i]);
 		}
-		else if (strcmp(col_name[i], "year") == 0)
+		else if (strcmp(col_name[i], "language") == 0)
 		{
-			memset(pcr->year, 0, 256);
+			memset(pcr->language, 0, 256);
 			if (argv[i] == NULL)
 				continue;
-			strcpy(pcr->year, argv[i]);
+			strcpy(pcr->language, argv[i]);
+		}
+		else if (strcmp(col_name[i], "publisher") == 0)
+		{
+			memset(pcr->publisher, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->publisher, argv[i]);
+		}
+		else if (strcmp(col_name[i], "translator") == 0)
+		{
+			memset(pcr->translator, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->translator, argv[i]);
 		}
 	}
 	ent_index++;
@@ -392,6 +427,9 @@ int query_task(int ch, int mode, char *data)
 	case ARGS_KEY_UPDATE:
 		update(sql, data);
 		break;
+	case ARGS_KEY_OUTPUT:
+		output(sql, data);
+		break;
 	case ARGS_KEY_QUERY:
 		sprintf(sql, "%s", data);
 		break;
@@ -459,7 +497,7 @@ void update_ui(cursor *cr)
 {
 	int len = 0, index;
 	char sql[4096];
-	char col[] = "entry_k,entry_t,keywords,author,edition,editor,isbn,language,title,translator,file,year";
+	char col[] = "*";
 	char tokens[2048];
 	pcr = cr;
 	columns[0].cur_count = 0;
@@ -515,14 +553,17 @@ void update_ui(cursor *cr)
 	//
 	mvprintw( 0, pcr->szw * COL2, "entry_k   : %s", pcr->entry_k);
 	mvprintw( 1, pcr->szw * COL2, "entry_t   : %s", pcr->entry_t);
-	mvprintw( 2, pcr->szw * COL2, "keywords  : %s", pcr->keywords);
-	mvprintw( 3, pcr->szw * COL2, "author    : %s", pcr->author);
+	mvprintw( 2, pcr->szw * COL2, "author    : %s", pcr->author);
+	mvprintw( 3, pcr->szw * COL2, "editor    : %s", pcr->editor);
 	mvprintw( 4, pcr->szw * COL2, "edition   : %s", pcr->edition);
-	mvprintw( 5, pcr->szw * COL2, "editor    : %s", pcr->editor);
-	mvprintw( 6, pcr->szw * COL2, "isbn      : %s", pcr->isbn);
-	mvprintw( 7, pcr->szw * COL2, "language  : %s", pcr->language);
+	mvprintw( 5, pcr->szw * COL2, "file      : %s", pcr->file);
+	mvprintw( 6, pcr->szw * COL2, "date      : %s", pcr->date);
+	mvprintw( 7, pcr->szw * COL2, "isbn      : %s", pcr->isbn);
 	mvprintw( 8, pcr->szw * COL2, "title     : %s", pcr->title);
-	mvprintw( 9, pcr->szw * COL2, "translator: %s", pcr->translator);
-	mvprintw(10, pcr->szw * COL2, "file      : %s", pcr->file);
-	mvprintw(11, pcr->szw * COL2, "year      : %s", pcr->year);
+	mvprintw( 9, pcr->szw * COL2, "pages     : %s", pcr->pages);
+	mvprintw(10, pcr->szw * COL2, "subject   : %s", pcr->subject);
+	mvprintw(11, pcr->szw * COL2, "keywords  : %s", pcr->keywords);
+	mvprintw(12, pcr->szw * COL2, "language  : %s", pcr->language);
+	mvprintw(13, pcr->szw * COL2, "publisher : %s", pcr->publisher);
+	mvprintw(14, pcr->szw * COL2, "translator: %s", pcr->translator);
 }

@@ -168,6 +168,7 @@ static error_t parse_opt(int key, char *arg, __unused struct argp_state *state)
 	case ARGS_KEY_DELETE:
 	case ARGS_KEY_INSERT:
 	case ARGS_KEY_UPDATE:
+	case ARGS_KEY_OUTPUT:
 	case ARGS_KEY_QUERY:
 		query_task(key, 0, arg);
 		break;
@@ -188,6 +189,7 @@ static struct argp_option options[] = {
 	{"delete", ARGS_KEY_DELETE, "KEY", 0, "delete entry from database", 0},
 	{"insert", ARGS_KEY_INSERT, "FILE", 0, "insert a new entry to database", 0},
 	{"update", ARGS_KEY_UPDATE, "FILE", 0, "update exist entry of database", 0},
+	{"output", ARGS_KEY_OUTPUT, "DATA", 0, "output data to BIB format", 0},
 	{"query", ARGS_KEY_QUERY, "SQL", 0, "query SQL", 0},
 	{0, 0, 0, 0, 0, 0}
 };

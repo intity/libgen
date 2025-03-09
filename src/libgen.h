@@ -19,6 +19,7 @@
 #define ARGS_KEY_DELETE	'd'
 #define ARGS_KEY_INSERT	'i'
 #define ARGS_KEY_UPDATE	'u'
+#define ARGS_KEY_OUTPUT	'o'
 #define ARGS_KEY_QUERY	'q'
 
 #include <stdlib.h>
@@ -62,17 +63,20 @@ typedef struct
 	/* custom fields */
 	char entry_k[128]; // entry cite key
 	char entry_t[128]; // entry type
-	/* specific fields */
-	char keywords[256];
 	/* standard fields */
 	char author[256];
-	char edition[256];
 	char editor[256];
-	char isbn[256];
+	char edition[256];
+	char subject[256];  // specific field (part of the file path)
+	char keywords[256]; // specific field (sort by sql query)
 	char language[256];
+	char publisher[256];
 	char translator[256];
 	char title[256];
-	char file[256]; // book filename (example: book_name.djvu)
+	char pages[128];
+	char date[128];
+	char isbn[256];
+	char file[256]; // specific field (file name with extension)
 	char year[128];
 } cursor;
 
