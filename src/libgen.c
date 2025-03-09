@@ -549,6 +549,14 @@ void update_ui(cursor *cr)
 	}
 	query_task(ARGS_KEY_QUERY, 1, sql);
 	//
+	// copy date from `year` field if `date` field is zero length
+	//
+	if (strlen(pcr->date) == 0)
+	{
+		memset(pcr->date, 0, 128);
+		strcpy(pcr->date, pcr->year);
+	}
+	//
 	// print details for selected entry
 	//
 	mvprintw( 0, pcr->szw * COL2, "entry_k   : %s", pcr->entry_k);
