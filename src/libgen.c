@@ -316,6 +316,13 @@ static int call_1(__unused void *reserved, int argc, char **argv, char **col_nam
 				continue;
 			strcpy(pcr->pages, argv[i]);
 		}
+		else if (strcmp(col_name[i], "subject") == 0)
+		{
+			memset(pcr->subject, 0, 256);
+			if (argv[i] == NULL)
+				continue;
+			strcpy(pcr->subject, argv[i]);
+		}
 		else if (strcmp(col_name[i], "keywords") == 0)
 		{
 			memset(pcr->keywords, 0, 256);

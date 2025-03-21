@@ -89,6 +89,7 @@ CREATE TABLE [entries]
   [shortseries] TEXT,
   [shorttitle] TEXT,
   [subtitle] TEXT,
+  [subject] TEXT,
   [title] TEXT,
   [titleaddon] TEXT,
   [translator] TEXT,
