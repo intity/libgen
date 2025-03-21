@@ -6,8 +6,8 @@
 #define LIBGEN_H
 
 #define LIBGEN_DB "/usr/local/libgen/library.db"
-#define ENT_COUNT 100
-#define SEC_COUNT 100
+#define ENT_COUNT 101
+#define SEC_COUNT 101
 #define COL_COUNT 2
 
 /* width columns */
