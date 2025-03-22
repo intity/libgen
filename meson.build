@@ -9,7 +9,8 @@ cc = meson.get_compiler('c')
 argp = cc.find_library('argp', required: false)
 curses = dependency('ncursesw', version: '>=6.5')
 sqlite = dependency('sqlite3', version: '>=3.47')
-deps = [curses, sqlite]
+lmagic = dependency('libmagic', version: '>=5.46')
+deps = [curses, sqlite, lmagic]
 if argp.found()
     deps += [argp]
 endif

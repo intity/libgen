@@ -3,6 +3,7 @@
  */
 
 #include <argp.h>
+#include <magic.h>
 #include <unistd.h>
 #include <locale.h>
 #include <sys/wait.h>
@@ -64,7 +65,7 @@ static int set_state(cursor *cr, int val)
 	return state; // old state
 }
 
-static int run_command(const char *cmd)
+static int run_vi(const char *cmd)
 {
 	pid_t pid;
 	int status;
@@ -87,26 +88,50 @@ static int run_command(const char *cmd)
 	return status;
 }
 
-static char *get_viewer(const char *file)
+static void run_command(cursor *cr)
 {
-	char *ext = strrchr(file, '.');
-	if (ext == NULL)
+	int cur_index;
+	char argv[PATH_MAX];
+	char path[PATH_MAX - 128];
+	const char *result = NULL;
+	const char *types[] = {
+		"application/pdf",
+		"image/vnd.djvu"
+	};
+	magic_t cookie = NULL;
+	cur_index = cr->szh - 1;
+
+	if ((cookie = magic_open(MAGIC_MIME_TYPE)) == NULL)
 	{
-		return NULL;
+		mvprintw(cur_index, 0, ": failed to create magic cookie pointer");
+		return;
 	}
-	else if (strcmp(ext, ".pdf") == 0)
+	else if (magic_load(cookie, NULL) != 0)
 	{
-		return cfg.vid != NULL ? cfg.vid : cfg.vi1;
+		mvprintw(cur_index, 0, ": failed to load MIME type database");
+		magic_close(cookie);
+		return;
 	}
-	else if (strcmp(ext, ".djvu") == 0)
-	{
-		return cfg.vid != NULL ? cfg.vid : cfg.vi2;
-	}
+	else if (strlen(cr->subject) == 0)
+		sprintf(path, "%s/%s", cfg.lib, cr->file);
 	else
-	{
-		return cfg.vid;
-	}
-	return NULL;
+		sprintf(path, "%s/%s/%s", cfg.lib, cr->subject, cr->file);
+
+	if ((result = magic_file(cookie, path)) == NULL)
+		mvprintw(cur_index, 0, ": MIME type not defined");
+	else if (cfg.vi1 != NULL && strcmp(result, types[0]) == 0)
+		sprintf(argv, "%s %s", cfg.vi1, path);
+	else if (cfg.vi2 != NULL && strcmp(result, types[1]) == 0)
+		sprintf(argv, "%s %s", cfg.vi2, path);
+	else if (cfg.vid != NULL)
+		sprintf(argv, "%s %s", cfg.vid, path);
+	else
+		mvprintw(cur_index, 0, ": reader application not defined");
+
+	magic_close(cookie);
+
+	if (strlen(argv))
+		run_vi(argv);
 }
 
 static void resize_ui(cursor *cr)
@@ -290,12 +315,8 @@ void key_bindings(int ch, cursor *cr)
 		}
 		else // commands
 		{
-			char command[PATH_MAX];
-			char *viewer = get_viewer(cr->file);
-			if (viewer == NULL)
-				return;
-			sprintf(command, "%s %s/%s", viewer, cfg.lib, cr->file);
-			run_command(command);
+			run_command(cr);
+			move(cur_index, x);
 		}
 		break;
 	case KEY_RESIZE:
