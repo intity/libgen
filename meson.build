@@ -22,4 +22,4 @@ executable('libgen',
 )
 
 install_man('doc/libgen.1')
-meson.add_install_script('data/install_db.sh')
+meson.add_install_script('bin/install_db.sh')
