@@ -6,5 +6,5 @@ LIBGEN_LDB=$LIBGEN_DIR/library.db
 
 # install local database
 if [ ! -f $LIBGEN_LDB ]; then
-	sqlite3 $LIBGEN_LDB < ../data/scheme.sql
+	sqlite3 $LIBGEN_LDB < ../dataset/scheme.sql
 fi
