@@ -12,11 +12,13 @@ which provides the following features:
 - processing requests.
 
 In addition, `libgen` can be run interactively, which provides a simple 
-interface for accessing the local database. Available features in interactive 
-mode:
+interface for accessing the local database.
+
+Available features in interactive mode:
 
 - sorting entries by keywords;
-- launch the file viewer (currently only PDF and DJVU formats are supported).
+- launch the file viewer:
+    - MSYS2: currently only PDF and DJVU formats are supported.
 
 ## Dependencies
 
