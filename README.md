@@ -1,4 +1,4 @@
-# libgen - Library Genesis Tools
+# libgen-tools
 
 `libgen` is an open source software designed to configure and store 
 bibliographic data in a local database.
@@ -23,9 +23,10 @@ mode:
 - `ncurses >= 6.5`
 - `sqlite3 >= 3.47`
 
-## Build and Install
+## Building and installation of tools
 
 To build and install libgen on your system, use the following commands:
+
 ```sh
 meson setup build
 ninja -C build/
@@ -37,65 +38,88 @@ ninja -C build/ install
 The `libgen` software package is configured by adding environment variables.
 
 Set the path to the libgary directory. For example:
+
 ```sh
 export LIBGEN_LIB=${HOME}/Library
 ```
+
 Set the viewer for PDF files. For example:
+
 ```sh
 export LIBGEN_VI1=mupdf
 ```
+
 Set the viewer for DJVU files. For example:
+
 ```sh
 export LIBGEN_VI2=djview
 ```
+
 Set the viewer by default. For example:
+
 ```sh
 export LIBGEN_VID=zathura
 ```
+
 If you want to change the location of the database file, then you need to set a 
 `LIBGEN_LDB` variable to override the path. By default, the path to the local 
 database is set as `/usr/local/libgen/library.db`.
 
-## Examples
+## Example of use
 
-To add an entry to the database, you need to create a metadata file, for example:
+Create an empty file in a text editor:
+
+```sh
+$EDITOR computer-systems-3ed-en.epub.txt
 ```
-entry_k	"ebb9004fe72f0da390bdef45026b2786"
+
+Fill in the fields in text format [key\tvalue\n], for example:
+
+```txt
+entry_k	"17211a61042ffc033762b87eea867beb"
 entry_t	"@book"
-author	"Randal E. Bryant, David R. O'Hallaron"
+subject "computer-sci"
 edition	"3"
-file	"computer-systems-3ed-en.pdf"
+author	"Randal E. Bryant, David R. O'Hallaron"
+date    "2016"
 isbn	"978-1-488-67207-1"
+file	"computer-systems-3ed-en.epub"
+pages	"1105"
+title	"Computer Systems"
+subtitle	"A Programmer's Perspective"
 keywords	"computer-sci,systems"
 language	"english"
-pages	"1105"
 publisher	"Pearson Education Ltd"
-title	"Computer Systems"
-year	"2016"
 ```
+
 It is important that the separator between the field and the value is a tab 
 character. In addition, the value of the `entry_k` field must be unique. The 
 key for entry can be obtained using the `md5sum` command.
 
-Now that the data is prepared, save the file with the `*.txt` extension, for 
-example:
-```
-computer-systems-3ed-en.pdf.txt
-```
 Next, add an entry to the database:
+
 ```sh
-libgen -i "computer-systems-3ed-en.pdf.txt"
+libgen -i "computer-systems-3ed-en.epub.txt"
 ```
-If you need to update the entry, just change the metadata file and update the 
-database:
+
+For additional control, you can print the screen recording:
+
+```sh
+lingen -o "17211a61042ffc033762b87eea867beb"
+```
+
+To update a record in the database, use the same metadata file you applied earlier, for example:
+
 ```sh
 libgen -u "computer-systems-3ed-en.pdf.txt"
 ```
-It is important that the key is not changed when updating the entry. Otherwise, 
-you will get an error.
 
-Finally, if you need to delete this entry from the database, do the following:
+>It is important that the key is not changed when updating the record, otherwise you will get an error.
+
+And if you need to delete a record from the database, do this:
+
 ```sh
-libgen -d "ebb9004fe72f0da390bdef45026b2786"
+libgen -d "17211a61042ffc033762b87eea867beb"
 ```
+
 As you can see, it's pretty simple.
